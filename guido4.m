@@ -1,3 +1,7 @@
+%% Example script for doing the WV calibration. Reads 1h of
+% nighttime data and performs the calibration of 
+%
+%             h2o_lidar = PC_H2O / AN_N2 
 clear all
 
 addpath('./libs/')
@@ -55,53 +59,54 @@ end
 sonda=csvread('sonda2.csv',2);
 
 %%
-% calibrating water vapor
+% Calibration
 
 h2o = P(:,5) ./ P(:,3) ; % PC_H2o / AN_N2
 
-figure(9)
-clf; hold on; grid on
-ylim([0 7])
-plot(h2o*12, altitude/1e3,'-')
-plot(smooth(h2o,11)*12, altitude/1e3,'-')
-xlabel('h2o (g/kg)')
-ylabel('km')
-plot(sonda(:,6), sonda(:,2)/1e3,'o')
-legend('h2o lidar', 'h2o lidar smoothed', 'h2o sonde')
-
-
-%%
-% Calibration
 % interpolate lidar data to sonde levels
-
 sm = 11;
 h2o_lidar = interp1q(smooth(altitude,sm),smooth(h2o,sm), sonda(:,2));
 
+% use data above 150 m and up to 10km
 mask = sonda(:,2) > 150 & sonda(:,2) < 10000;
+
+% linear fit
 X = h2o_lidar(mask);
 Y = sonda(mask,6);
 cfun_calib = fit(X,Y,'poly1')
 
-%%
+% apply the calibration to the lidar profile
+h2o_calib = cfun_calib(h2o);
 
-figure(15)
+%% plots
+
+figure(9)
 clf; hold on; grid on
-plot(h2o, altitude./1000,'-')
-plot(h2o_lidar, sonda(:,2)./1000,'*k')
+plot(sonda(:,6), sonda(:,2)/1e3,'om')
+xlim([0 20])
 ylim([0 7])
-xlabel('h2o (g/kg)')
+xlabel('h2o sonde (g/kg)')
+legend('h2o sonde')
+
+figure(10)
+clf; hold on; grid on
+plot(h2o, altitude/1e3,'-')
+plot(smooth(h2o,11), altitude/1e3,'-')
+plot(h2o_lidar, sonda(:,2)./1e3,'*k')
+xlim([0 2])
+ylim([0 7])
+xlabel('h2o lidar uncalibrated [a.u.]')
 ylabel('km')
-legend('h2o lidar', 'h2o lidar interp')
+legend('h2o lidar', 'h2o lidar smoothed', 'h2o lidar interp')
 
-
-figure(16)
+figure(11)
 clf;
 plot(X,Y,'*')
 hold on
 plot(X,cfun_calib(X))
 hold off
 grid on
-xlabel('h2o lidar uncalibrated [u.a.]')
+xlabel('h2o lidar uncalibrated [a.u.]')
 ylabel('h2o sonde [g/kg]')
 title('linear calibration')
 text(0.04,10.3,['y = ' num2str(cfun_calib.p1,3) '*x + ' num2str(cfun_calib.p2,2)],...
@@ -109,19 +114,16 @@ text(0.04,10.3,['y = ' num2str(cfun_calib.p1,3) '*x + ' num2str(cfun_calib.p2,2)
 
 %%
 
-h2o_calibado = cfun_calib(h2o);
-
-figure(90)
+figure(12)
 clf; hold on; grid on
-ylim([0 7])
-plot(h2o_calibado, altitude/1e3,'-')
-
-plot(smooth(h2o_calibado,sm), altitude/1e3,'-')
-title('Sinal calibrado')
-xlabel('razão de mistura H2O [g/Kg]')
-ylabel('[km]')
-
+plot(h2o_calib, altitude/1e3,'-')
+plot(smooth(h2o_calib,sm), altitude/1e3,'-')
 plot(sonda(:,6), sonda(:,2)/1e3,'o')
-legend('lidar','sinal smooth','radiossondagem')
+xlim([-1 20])
+ylim([0 7])
+title('Calibrated Sinal')
+xlabel('H2O Mixing ratio [g/Kg]')
+ylabel('Altitude a.s.l. [km]')
+legend('lidar','sinal smooth','sonde')
 
 %fim

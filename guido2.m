@@ -1,3 +1,10 @@
+%% Example script to open a bunch of files and plot
+% - curtain of 355 AN signal
+% - curtain of 355 AN BG corrected signal
+% - 355 AN signal above 100 km for different time averages
+% - All channels up to 20 km, mean of all profiles
+% - curtain of 355 AN RCS
+
 clear all
 
 addpath('./libs/')
@@ -88,7 +95,7 @@ set(gca,'xscale','log')
 %%
 
 
-figure(10)
+figure(5)
 clf
 %set(gcf,'units','normalized','outerposition',[0 0 0.8 1])
 gplot2(Pr2(:,:,1),[0:0.1:1.5].*1e7, jd,alt/1.e3)

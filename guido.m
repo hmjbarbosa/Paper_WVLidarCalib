@@ -1,4 +1,4 @@
-%%
+%% Example script to plot the RCS for all channels in a single file
 close all
 fclose all
 clear all

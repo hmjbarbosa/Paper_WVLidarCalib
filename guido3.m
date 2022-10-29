@@ -1,3 +1,7 @@
+%% Example script for the gluing of AN and PC. Reads 1h of
+% nighttime data and performs the gluing for the 355 (elastic)
+% and 387 (nitrogen) channels
+
 clear all
 
 addpath('./libs/')
