@@ -1,13 +1,23 @@
-%close all
+%% It seems this script does not do what it's name imply. 
+% Only some random plots, probably not usefull and safe to delete. 
 
-%clear all
+%close all
+clear all
+
+addpath('./libs/')
+addpath('./sc/')
+
+% datadir
+basedir='/Users/hbarbosa/DATA/lidar/';
+
 %[nfile, head, chphy]=profile_read_dir('2015/6/10',[],[],[],4000);
 
-%[nfile, head, chphy]=profile_read_dir('2012_11_29_telescope/NocLight',[],[],[],4000);
+[nfile, head, chphy]=profile_read_dir([basedir 'data/2012_11_29_telescope/NocLight'],[],[],[],4000);
 
-
+% background for each profile 
 bg=mean(chphy(1).data(end-500:end,:))*0;
 
+% range (m)
 ndata=head(1).ch(1).ndata;
 r=7.5*(1:ndata);
 r2=r.*r;
@@ -27,24 +37,36 @@ for i=1:j
 end
 
 figure(1); clf; 
-imagesc(phy)
+gplot2(phy, [], jd, r/1e3)
 caxis(quantile(reshape(phy,1,numel(phy)),[0.01 0.99]))
 colorbar; grid
+ylabel('km')
+xlabel('time')
+datetick('x','keeplimits')
 
 figure(2); clf; 
-imagesc(phy.*mr2)
+gplot2(phy.*mr2, [], jd, r/1e3)
 caxis(quantile(reshape(phy.*mr2,1,numel(phy)),[0.01 0.99]))
 colorbar; grid
+ylabel('km')
+xlabel('time')
+datetick('x','keeplimits')
 
 figure(3); clf; 
 plot(mod(jd,1)*24,'*')
+ylabel('hour of day')
+xlabel('profile #')
 grid
 
 figure(4); clf; 
-plot(mean((phy.*mr2)'))
+plot(r/1e3, mean((phy.*mr2)'))
+ylabel('P*R2')
+xlabel('km')
 grid
 
 figure(5); clf; 
-plot(mean(phy'))
+plot(r/1e3, mean(phy'))
+ylabel('P')
+xlabel('km')
 grid
 %
