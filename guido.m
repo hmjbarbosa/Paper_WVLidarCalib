@@ -3,28 +3,30 @@ close all
 fclose all
 clear all
 
+% datadir
+basedir='/Users/hbarbosa/DATA/lidar/';
+
 % change display for all plots
 set(0, 'DefaultAxesFontSize', 12, 'DefaultLineLineWidth', 2)
-%%
-addpath('./IC Henrique/')
-addpath('./data/')
-addpath('./sc/')
-%%
-% exemplo 1 ------------------------------------
-% abre so um arquivo
-fname='data/2014/9/15/RM1491500.001'; % noite
-%fname='data/2014/9/15/RM1491514.205'; % dia
+
+% exemple 1 ------------------------------------
+
+% open only 1 file
+fname=[basedir 'data/2014/9/14/RM1491400.000']; % night
+%fname=[basedir 'data/2014/9/14/RM1491414.054']; % day
 
 [head, phy] = profile_read(fname);
 
-% conteudo do header na tela
+% print header from file
 head
 
-% conteudo do primeiro canal
+% print first channel 
 head.ch(1)
 
-% removendo o ruido
+% altudes in m
 alt(:,1)=head.ch(1).binw*(1:head.ch(1).ndata);
+
+% remove the background from all channels
 
 for i=1:head.nch
 	bg(i) = mean(phy(end-1000:end,i));
@@ -34,12 +36,13 @@ end
 
 % grafico
 figure(1)
-clf
+clf; hold on; grid on
 plot((Pr2),alt/1e3)
 legend('an355','pc355','an387','pc387','pc408')
 set(gca,'xscale','log')
-grid on
-ylim([0,10])
+xlabel('RCS [a.u.]')
+ylabel('Altitude [km]')
+ylim([0,20])
 title(fname)
 
 

@@ -1,32 +1,32 @@
-% clear all
+clear all
 
+addpath('./libs/')
 addpath('./sc/')
+
+% datadir
+basedir='/Users/hbarbosa/DATA/lidar/';
 
 % exemplo 2 ------------------------------------
 
-% abrir varios arquivos
-% flist=dirpath('data/2014/9/15/','RM1491500*');
-flist=dirpath('data/2014/9/14/','RM1491420*');
-flist=dirpath('D:/Dados/lidar/data/2014/9/14/','RM14914*');
-
+% open various files 
+flist=dirpath([basedir 'data/2014/9/14/'],'RM1491420*');
 [head, phy]=profile_read_many(flist);
 
-% conteudo do cabecalho do arquivo #10
-
+% print header from file #1
 head(10)
 
-% tamanho dos dados
-
+% print size of data
 size(phy(1).data)
 
-% alturas
+% altudes in m
 alt(:,1)=head(1).ch(1).binw*(1:head(1).ch(1).ndata);
-% horarios dos arquivos
+
+% times in Matlab's julian date
 for i=1:numel(head)
 	jd(i)=head(i).jdi;
 end
-% mostra o primeiro horario na tela
-datevec(jd(1))
+
+% print first time 
 datestr(jd(1))
 
 % fazer figura nova
@@ -34,11 +34,12 @@ datestr(jd(1))
 figure(1)
 clf
 gplot2(phy(1).data,[], jd,alt/1.e3)
-title('canal 1')
+title('channel 1, uncorrected, mV')
 ylabel('km')
-xlabel('tempo')
+xlabel('time')
+datetick('x','keeplimits')
 
-% subtraindo o ruido dos 118 perfis
+% remove the background from all channels and all profiles
 
 for i=1:head(1).nch
 	for j=1:numel(head)
@@ -51,21 +52,23 @@ end
 figure(2)
 clf
 gplot2(P(:,:,1),[], jd,alt/1.e3)
-title('canal 1 sem BG')
+title('channel 1, BG corrected, mV')
 ylabel('km')
-xlabel('tempo')
+xlabel('time')
+datetick('x','keeplimits')
 
 % agora testando o efeito de fazer uma media no tempo
 
 figure(3)
-clf
+clf; hold on
 plot(phy(1).data(:,1),alt/1.e3)
-hold on
 plot(mean(phy(1).data(:,1:10),2),alt/1.e3)
 plot(mean(phy(1).data(:,:),2),alt/1.e3)
 ylim([100 alt(end)/1e3])
 ylabel('km')
-legend('1 perfil','10 perfis','todos')
+xlabel('channel 1, mV')
+legend('1 profile','10 profile','all')
+title('averaging')
 
 % olhando o perfil inteiro, media no tempo
 
@@ -79,33 +82,22 @@ plot(mean(phy(4).data(:,:),2),alt/1.e3)
 plot(mean(phy(5).data(:,:),2),alt/1.e3)
 ylabel('km')
 legend('an355','pc355','an387','pc387','pc408')
+ylim([0 20])
+set(gca,'xscale','log')
 
 %%
 
 
 figure(10)
 clf
-set(gcf,'units','normalized','outerposition',[0 0 0.8 1])
+%set(gcf,'units','normalized','outerposition',[0 0 0.8 1])
 gplot2(Pr2(:,:,1),[0:0.1:1.5].*1e7, jd,alt/1.e3)
-title('canal 1 sem BG')
-ylabel('Altura [km]')
-xlabel('Horário [LT]')
+title('channel 1, RCS')
+ylabel('Altitude [km]')
+xlabel('Time [LT]')
 ylim([0 15])
 datetick('x','keeplimits')
-
 hc = colorbar;
-ylabel(hc,'Sinal corrigido pela distância [U.A.]','fontsize',14)
-
-saveas(gca,'figuras/RCS_2D.png')
-
-% figure(11)
-% clf
-% set(gcf,'units','normalized','outerposition',[0 0 0.8 1])
-% gplot2(log10(Pr2(:,:,1)),[6:0.1:7.5], jd,alt/1.e3)
-% title('canal 1 sem BG')
-% ylabel('km')
-% xlabel('tempo')
-% ylim([0 15])
 
 
 %fim
