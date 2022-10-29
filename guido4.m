@@ -1,95 +1,98 @@
 clear all
 
-%%
+addpath('./libs/')
 addpath('./sc/')
-%%
+
+% datadir
+basedir='/Users/hbarbosa/DATA/lidar/';
+
 %	change	display	for	all	plots
 set(0,	'DefaultAxesFontSize',	12,	'DefaultLineLineWidth',	2)
-%%
+
 % exemplo 4 ------------------------------------
 
-% abrir varios arquivos
-% flist=dirpath('data/2014/9/15/','RM1491500*');
-flist=dirpath('data/2014/9/14/','RM1491420*');
-
+% open various files 
+flist=dirpath([basedir 'data/2014/9/14/'],'RM1491420*');
 [head, phy]=profile_read_many(flist,10, 0.004);
 
-% conteudo do cabecalho do arquivo #10
+% print header from file #1
+head(1)
 
-head(10)
-
-% tamanho dos dados
-
+% print size of data
 size(phy(1).data)
 
-% alturas
+% altudes in m
 alt(:,1)=head(1).ch(1).binw*(1:head(1).ch(1).ndata);
 
-% altitude  
+% altitude above sea level
 altitude = alt + head(1).alt;
 
-% horarios dos arquivos
+% times in Matlab's julian date
 for i=1:numel(head)
 	jd(i)=head(i).jdi;
 end
-% mostra o primeiro horario na tela
-datevec(jd(1))
+
+% print first time 
 datestr(jd(1))
 
-% subtraindo o ruido dos 118 perfis
+% remove the background from all channels
 
 for i=1:head(1).nch
+    % average of all datafiles
 	PcomBG(:,i) = mean(phy(i).data(:,:),2);
 
+    % comput BG from last 5000 bins (37.5 km)
 	bg(i) = mean(PcomBG(end-5000:end,i));
 	desvio(i) = std(PcomBG(end-5000:end,i), 1);
 
+    % remove BG and correct range
 	P(:,i) = PcomBG(:,i) - bg(i);
 	Pr2(:,i) = P(:,i).*alt.*alt;
 end	
 
+% read sounding 
+% sonda=csvread('sonda.csv',2)
+sonda=csvread('sonda2.csv',2);
+
 %%
-% calibrando vapor de agua
+% calibrating water vapor
 
 h2o = P(:,5) ./ P(:,3) ; % PC_H2o / AN_N2
 
 figure(9)
-clf; hold on
+clf; hold on; grid on
 ylim([0 7])
 plot(h2o*12, altitude/1e3,'-')
-
 plot(smooth(h2o,11)*12, altitude/1e3,'-')
-
-xlabel('h2o')
+xlabel('h2o (g/kg)')
 ylabel('km')
-grid on
-
-% lendo a sondagem
-% sonda=csvread('sonda.csv',2)
-sonda=csvread('sonda2.csv',2)
-
 plot(sonda(:,6), sonda(:,2)/1e3,'o')
+legend('h2o lidar', 'h2o lidar smoothed', 'h2o sonde')
 
 
 %%
+% Calibration
+% interpolate lidar data to sonde levels
 
-% interpolar dados lidar nos níveis da sonda
 sm = 11;
 h2o_lidar = interp1q(smooth(altitude,sm),smooth(h2o,sm), sonda(:,2));
 
-figure(15)
-clf
-plot(h2o,altitude./1000,'-',h2o_lidar,sonda(:,2)./1000,'*k')
-grid on
-ylim([0 7])
-
-
-mask = sonda(:,2) > 150 & sonda(:,2) < 10000 ;
-
+mask = sonda(:,2) > 150 & sonda(:,2) < 10000;
 X = h2o_lidar(mask);
 Y = sonda(mask,6);
-
 cfun_calib = fit(X,Y,'poly1')
+
+%%
+
+figure(15)
+clf; hold on; grid on
+plot(h2o, altitude./1000,'-')
+plot(h2o_lidar, sonda(:,2)./1000,'*k')
+ylim([0 7])
+xlabel('h2o (g/kg)')
+ylabel('km')
+legend('h2o lidar', 'h2o lidar interp')
+
 
 figure(16)
 clf;
@@ -98,18 +101,18 @@ hold on
 plot(X,cfun_calib(X))
 hold off
 grid on
-xlabel('Sinal do lidar [u.a.]')
-ylabel('Razão de mistura de H_2O (Sonda) [g/kg]')
-title('ajuste que fornece a constante de calibração')
-text(0.04,10.3,['y = ' num2str(cfun_calib.p1,3) '*x + ' num2str(cfun_calib.p2,2)])
-saveas(figure(16),'figuras/calib.png')
+xlabel('h2o lidar uncalibrated [u.a.]')
+ylabel('h2o sonde [g/kg]')
+title('linear calibration')
+text(0.04,10.3,['y = ' num2str(cfun_calib.p1,3) '*x + ' num2str(cfun_calib.p2,2)],...
+     'fontsize',14)
 
 %%
 
 h2o_calibado = cfun_calib(h2o);
 
 figure(90)
-clf; hold on
+clf; hold on; grid on
 ylim([0 7])
 plot(h2o_calibado, altitude/1e3,'-')
 
@@ -117,51 +120,8 @@ plot(smooth(h2o_calibado,sm), altitude/1e3,'-')
 title('Sinal calibrado')
 xlabel('razão de mistura H2O [g/Kg]')
 ylabel('[km]')
-grid on
-
-% lendo a sondagem
-% sonda=csvread('sonda.csv',2)
-sonda=csvread('sonda2.csv',2)
 
 plot(sonda(:,6), sonda(:,2)/1e3,'o')
 legend('lidar','sinal smooth','radiossondagem')
-%%
-%%%%%%%%%%%%%%%%%%%
-
-
-% 
-% % interpolar sonda nos níveis do lidar
-% h2o_sonde = interp1q(sonda(:,2),sonda(:,6),altitude)
-% 
-% figure(10)
-% clf
-% plot(sonda(:,6),sonda(:,2)./1000,'or',h2o_sonde,altitude./1000,'-')
-% grid on
-% ylim([0 7])
-% 
-% 
-% mask = altitude > 150 & altitude < 10000 ;
-% 
-% X = h2o(mask);
-% Y = h2o_sonde(mask);
-% 
-% cfun = fit(X,Y,'poly1')
-% 
-% figure(10)
-% clf;
-% plot(X,Y,'.')
-% hold on
-% plot(X,cfun(X))
-% hold off
-% grid on
-% xlabel('Sinal do lidar [u.a.]')
-% ylabel('Razão de mistura [g/kg]')
-% title('texto')
-% 
-% % % saveas(figure(10),'figuras/calib.png')
-% 
-
-
-
 
 %fim
