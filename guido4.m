@@ -100,8 +100,8 @@ hold off
 grid on
 xlabel('Sinal do lidar [u.a.]')
 ylabel('Razão de mistura de H_2O (Sonda) [g/kg]')
-title('texto')
-
+title('ajuste que fornece a constante de calibração')
+text(0.04,10.3,['y = ' num2str(cfun_calib.p1,3) '*x + ' num2str(cfun_calib.p2,2)])
 saveas(figure(16),'figuras/calib.png')
 
 %%
@@ -114,9 +114,9 @@ ylim([0 7])
 plot(h2o_calibado, altitude/1e3,'-')
 
 plot(smooth(h2o_calibado,sm), altitude/1e3,'-')
-
-xlabel('h2o')
-ylabel('km')
+title('Sinal calibrado')
+xlabel('razão de mistura H2O [g/Kg]')
+ylabel('[km]')
 grid on
 
 % lendo a sondagem
@@ -124,7 +124,7 @@ grid on
 sonda=csvread('sonda2.csv',2)
 
 plot(sonda(:,6), sonda(:,2)/1e3,'o')
-
+legend('lidar','sinal smooth','radiossondagem')
 %%
 %%%%%%%%%%%%%%%%%%%
 
