@@ -1,7 +1,8 @@
 % calib help
-function [a,b,c] = calib_function_v0_gps(sonde_alt,sonde_w,...
-                                         altitude,Pn2,Ph2o,...
-                                         jdi,jdf,bg_n2_std,bg_h2o_std)
+function [constante_cfit,gof,output] = ...
+        calib_function_v0_gps(sonde_alt, sonde_w,...
+                              altitude, Pn2, Ph2o,...
+                              jdi, jdf, bg_n2_std, bg_h2o_std)
 
 
 sm = 11;
@@ -88,7 +89,7 @@ Y = sonde_w(mask);
 %constante_cfit = fit(X(mask),Y(mask),'poly1')
 %myfunc = fittype( @(p1,x) p1*x )
 %[a,b,c] = fit(X,Y,myfunc)
-[a,b,c] = fit(X,Y,'poly1')
+[constante_cfit,gof,output] = fit(X,Y,'poly1')
 % constante_calib.p2 = cfun_calib.p2;
 % constante_calib.p1 = cfun_calib;
 
@@ -176,12 +177,12 @@ ylabel('Residuo [g/kg]')
 grid on
  %%
  
-disp(['p1 = ' num2str(a.p1) ])
-%disp(['p2 = ' num2str(a.p2) ])
+disp(['p1 = ' num2str(constante_cfit.p1) ])
+%disp(['p2 = ' num2str(constante_cfit.p2) ])
 figure (1542)
 clf; hold on; grid on; box on
-%plot(h2o.*a.p1, altitude/1000,'b')
-plot(h2o.*a.p1 + a.p2, altitude/1000,'b')
+%plot(h2o.*constante_cfit.p1, altitude/1000,'b')
+plot(h2o.*constante_cfit.p1 + constante_cfit.p2, altitude/1000,'b')
 plot(sonde_w,sonde_alt./1000,'o-r')
 plot(h2o.*829, altitude/1000,'-k')
 plot(h2o.*(829+82), altitude/1000,':','color','#909090')
