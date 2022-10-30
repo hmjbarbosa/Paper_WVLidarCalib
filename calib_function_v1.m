@@ -1,8 +1,8 @@
 % calib help
 function [constante_cfit,gof,output] = ...
-        calib_function_v0_gps(sonde_alt, sonde_w,...
-                              altitude, Pn2, Ph2o,...
-                              jdi, jdf, bg_n2_std, bg_h2o_std)
+        calib_function_v1(sonde_alt, sonde_w,...
+                          altitude, Pn2, Ph2o,...
+                          jdi, jdf, bg_n2_std, bg_h2o_std)
 
 
 sm = 11;
@@ -68,28 +68,29 @@ sup = altitude(mask_sm & altitude>500);
 sup(1)
 sup(end)
 if numel(sup)>0
-    calib_H_sup = sup(1) - 50 
+    calib_H_sup = sup(1) - 50 ;
 else
     calib_H_sup = 10000;
 end
 %calib_H_sup = 10000
 % calib_H_sup = 3500;
-calib_H_sup
+disp(sprintf('calib_H_sup = %f',calib_H_sup))
 mask = sonde_alt > calib_H_inf & sonde_alt < calib_H_sup ;
 
 X = h2o_lidar(mask);
-Y = sonde_w(mask); 
+Y = sonde_w(mask);
 
-% size(sonde_alt);
-% size(mask);
-% [sonde_alt/1000 mask h2o_lidar*1000 sonde_w ];
+% size(sonde_alt)
+% size(mask)
+% [sonde_alt/1000 mask h2o_lidar*1000 sonde_w ]
 
 % mask = ~isnan(X) & ~isnan(Y);
 %[X Y mask]
 %constante_cfit = fit(X(mask),Y(mask),'poly1')
 %myfunc = fittype( @(p1,x) p1*x )
-%[a,b,c] = fit(X,Y,myfunc)
+%[constante_cfit,gof,output] = fit(X,Y,myfunc)
 [constante_cfit,gof,output] = fit(X,Y,'poly1')
+
 % constante_calib.p2 = cfun_calib.p2;
 % constante_calib.p1 = cfun_calib;
 
@@ -98,29 +99,9 @@ Y = sonde_w(mask);
 %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%
 
-% figure(1538)
-% clf
-% plot(Pn2.*altitude.*altitude,altitude/1000,'g')
-% hold on
-% plot(Ph2o.*altitude.*altitude,altitude/1000,'b')
-% hold off
-% legend('Sinal nitrogenio','Sinal vapor de agua')
-%  set(gca,'xscale','log')
-% grid on 
-% title(['data from ' datestr(jdi) ' to ' datestr(jdf)])
-% xlabel('signal* r^2 U.A')
-% ylabel('Altitude asl (km)')
-% ylim([0 7])
-
 figure(1538)
 clf; hold on; grid on; box on
-%range=(1:numel(altitude))*7.5;
-%range=range';
-%plot(log(Pn2.*range.*range),altitude/1000,'g')
-%plot(log(Pn2),altitude/1000,'g')
 plot(Pn2,altitude/1000,'g')
-%plot(log(Ph2o.*range.*range),altitude/1000,'b')
-%plot(log(Ph2o),altitude/1000,'b')
 plot(Ph2o,altitude/1000,'b')
 legend('Nitrogen','Water vapor')
 set(gca,'xscale','log','xminorgrid','off')
@@ -150,7 +131,7 @@ clf; hold on; grid on; box on
 plot(X,Y,'*b')
 % plot(constante_cfit)
 %plot(a)
-plot(a,'predfunc')
+plot(constante_cfit,'predfunc')
 legend('Data','Fit','Location','northeast');
 %legend1 = legend(gca,'show');
 %set(legend1,'Location','southeast');
@@ -168,7 +149,7 @@ t=text(.98, .02, '  a  ', 'units', 'normalize',...
 figure(1541)
 clf
 hold on
-plot(X,Y-a(X),'ob')
+plot(X,Y-constante_cfit(X),'ob')
 hold off
 % legend('Razão de Mistura de H2O sonda')
 title(['data from ' datestr(jdi) ' to ' datestr(jdf)])

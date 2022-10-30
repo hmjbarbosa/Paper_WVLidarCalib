@@ -1,5 +1,8 @@
 % calib help
-function [constante_cfit,gof,output] = calib_function_v0(sonde_alt,sonde_w,altitude,Pn2,Ph2o,jdi,jdf,Pn2_stdm,bg_n2_std,bg_h2o_std)
+function [constante_cfit,gof,output] = ...
+        calib_function_v0(sonde_alt, sonde_w, ...
+                          altitude, Pn2, Ph2o, ...
+                          jdi, jdf, Pn2_stdm, bg_n2_std, bg_h2o_std)
 
 
 sm = 11;
@@ -18,21 +21,21 @@ mask_sm = ((sm_h2o./bg_h2o_std) < 10) | ((sm_n2./bg_n2_std) < 10)  ;
 
 h2o(mask_sm) = NaN;
 
-% figure (333);
-% clf
-% hold on
-% plot(altitude,sm_n2)
-% plot(altitude(mask_sm),sm_n2(mask_sm),'o')
-% xlim([0,15000])
-% hold off
-% 
-% figure(334)
-% clf
-% hold on 
-% plot(altitude,sm_h2o)
-% plot(altitude(mask_sm),sm_h2o(mask_sm),'o')
-% xlim([0,15000])
-% hold off
+figure (333);
+clf
+hold on
+plot(altitude,sm_n2)
+plot(altitude(mask_sm),sm_n2(mask_sm),'o')
+xlim([0,15000])
+hold off
+
+figure(334)
+clf
+hold on 
+plot(altitude,sm_h2o)
+plot(altitude(mask_sm),sm_h2o(mask_sm),'o')
+xlim([0,15000])
+hold off
 
 % [sm_n2(1000:1500),altitude(1000:1500)./1000,sm_h2o(1000:1500),h2o(1000:1500)]
 % bg_n2_std
@@ -60,7 +63,7 @@ else
 end
 %calib_H_sup = 10000
 % calib_H_sup = 3500;
-
+disp(sprintf('calib_H_sup = %f',calib_H_sup))
 mask = sonde_alt > calib_H_inf & sonde_alt < calib_H_sup ;
 
 X = h2o_lidar(mask);
@@ -84,14 +87,11 @@ Y = sonde_w(mask);
 %%%%%%%%%%%%%%%%%%%%%
 
 figure(1538)
-clf
+clf; hold on; grid on; box on
 plot(Pn2,altitude/1000,'g')
-hold on
 plot(Ph2o,altitude/1000,'b')
-hold off
 legend('Nitrogen','Water vapor')
 set(gca,'xscale','log')
-grid on 
 title(['data from ' datestr(jdi) ' to ' datestr(jdf)])
 xlabel('Signal (a.u.)')
 ylabel('Altitude a.s.l. (km)')
@@ -112,18 +112,15 @@ grid on
 
 
 figure(1540)
-clf
-hold on
+clf; hold on; grid on; box on
 plot(X,Y,'*b')
 % plot(constante_cfit)
 plot(constante_cfit,'predfunc')
-hold off
 % legend('Razão de Mistura de H2O sonda')
 %title(['data from ' datestr(jdi) ' to ' datestr(jdf)])
 title('Ajuste linear que fornece a constante de calibração')
 xlabel('Razão de Mistura Lidar Não Calibrado')
 ylabel('Razão de Mistura Sonda [g/kg]')
-grid on
 
 figure(1541)
 clf
