@@ -1,0 +1,23 @@
+(fixed) calibracao_v2 was subtracting BG from PC channels.
+
+(fixed??) em 2011 so temos 4000 bins, como remover o bg do AN?
+acho que com 1h de media ja conseguimos medir até 30km...
+Acho que eh consertado pelo fit do glue automaticamente...
+
+(fixed com 2012) precisa remover o dark current
+
+(fixed) limites do GLUE estao muito apertados.
+
+(fixed) fazer ajuste A*X e A*X+B calibracao
+
+(fixed) funcao de calibracao tava usando o bg_std para calcular o SNR!
+
+(fixed) nao podemos exigir valor minimo de SNR para o H2O... q=0 eh uma medida valida
+
+(fixed) calibracao tava usando de 200m ate a ultima altitude com SNR (errado) > 10.
+
+Remover casos com a sonda passando por dentro de uma nuvem (usar RH > 0.95 ???)
+
+Remover casos com nuvem no lidar (filtrar pelo SNR do N2 em 10km?)
+
+Remover casos com atmosfera nao uniforme
