@@ -18,8 +18,14 @@ h2o(1:13) = h2o(14);
 %mask_sm = ((sm_h2o./bg_h2o_std) < 10) | ((sm_n2./bg_n2_std) < 10)  ;
 mask_sm = altitude>10000 |((sm_n2./bg_n2_std) < 10) ;
 h2o(mask_sm) = NaN;
-first = find(h2o<0,5);
-h2o(first(end):end) = NaN;
+%hmjb acho que isso era porque a gente tava subtraindo o BG do PC,
+% o que era errado... dai ficava um pouco negativo. Sem subtrair, 
+% os sinais do h2o e do n2 sao sempre positivos (bom, isso se usar 
+% o glue do N2... se pegar o AN do N2 dai poderia ficar negativo tambem)
+first = find(h2o<0, 5)
+if (~isempty(first))
+    h2o(first(end):end) = NaN;
+end
 %abaixo de 200m o overlap é 0 e não da pra confiar no lidar
 %vamos assumir que o h2o é constante nessa reegião 
 
