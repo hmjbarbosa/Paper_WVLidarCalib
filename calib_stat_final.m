@@ -6,11 +6,12 @@ clear all
 % change display for all plots
 set(0, 'DefaultAxesFontSize', 16, 'DefaultLineLineWidth', 2)
 
-figure_dir = './figs/'
 
 %prepro_dir = 'C:\Users\guido\Google Drive\IC Henrique\prepro\';
 %prepro_dir = 'G:\.shortcut-targets-by-id\10F2V1DwX9Abl02tg9-a2rlR8Rp5yM4tm\prepro\'
 prepro_dir = './prepro/'
+figure_dir = './prepro/figs/'
+
 flist = dir([prepro_dir 'Calib*.mat']);
 
 %%
