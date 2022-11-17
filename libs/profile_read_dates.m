@@ -19,7 +19,8 @@ if isempty(maxz) maxz=0; end
 jd=jdi; ff={};
 %while (jd<jdf)
 while (floor(jd)<ceil(jdf))
-  time=datevec(jd)
+  time=datevec(jd);
+  disp(['profile_read_dates::LISTING files on ' datestr(time)])
   dir=sprintf('%s/%4d/%d/%02d',basedir,time(1),time(2),time(3));
   tmpf=dirpath(dir,'RM*');
   ff=[ff,tmpf];
@@ -55,4 +56,6 @@ end
 
 [head, chphy, chraw] = profile_read_many(filelist, dbin, dtime, ach, maxz);
 
+end
 %
+
